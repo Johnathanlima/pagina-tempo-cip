@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Tempo de CIP nas linhas de produção</title>
@@ -7,93 +8,97 @@
       font-size: 20px;
       letter-spacing: 1px;
     }
+
     h1, h2 {
-  font-size: 28px;
-  letter-spacing: 2px;
-}
+      font-size: 28px;
+      letter-spacing: 2px;
+    }
 
-.relogio {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  display: inline-block;
-}
+    .relogio {
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: inline-block;
+    }
 
-.tempoRestante {
-  margin-top: 10px;
-}
+    .tempoRestante {
+      margin-top: 10px;
+    }
 
-input[type="text"], input[type="date"], input[type="time"], input[type="number"], button {
-  font-size: 18px;
-  letter-spacing: 1px;
-  margin: 5px;
-}
+    input[type="text"], input[type="date"], input[type="time"], input[type="number"], button {
+      font-size: 18px;
+      letter-spacing: 1px;
+      margin: 5px;
+    }
   </style>
-</head>
-<body>
-  <h1>Tempo de CIP nas linhas de produção</h1>
-  <!-- Formulário para adicionar relógios -->
-<label for="tituloPrincipal">Título Principal:</label>
-<input type="text" id="tituloPrincipal">
-<br>
-<label for="dataInicial">Data Inicial:</label>
-<input type="date" id="dataInicial">
-<input type="time" id="horaInicial">
-<br>
-<label for="horasAdicionar">Adicionar Horas:</label>
-<input type="number" id="horasAdicionar" min="1" step="1">
-<button onclick="adicionarRelogio()">Adicionar Relógio</button>
+  <!-- Adicionando o SDK do Firebase -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+    
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC2Z0aQqiH8DknPobHRhgfTddmX0N6J900",
+      authDomain: "intervalo-de-cip.firebaseapp.com",
+      projectId: "intervalo-de-cip",
+      storageBucket: "intervalo-de-cip.appspot.com",
+      messagingSenderId: "703635057032",
+      appId: "1:703635057032:web:bd4ea138da8fb1c521b23d",
+      measurementId: "G-JQ0WT10HBT"
+    };
 
-  <!-- Container para os relógios adicionados -->
-  <div id="containerRelogios"></div>
-  <script>
-    let relogiosPorTitulo = JSON.parse(localStorage.getItem('relogiosCIP')) || {};
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
 
     // Função para adicionar relógios
-    function adicionarRelogio() {
+    async function adicionarRelogio() {
       const tituloPrincipal = document.getElementById("tituloPrincipal").value;
       const dataInicialString = document.getElementById("dataInicial").value;
       const horaInicialString = document.getElementById("horaInicial").value;
       const horasAdicionar = parseInt(document.getElementById("horasAdicionar").value);
-      
+
       const dataHoraInicialString = `${dataInicialString}T${horaInicialString}`;
       const dataHoraInicial = new Date(dataHoraInicialString);
-      
+
       const novaData = new Date(dataHoraInicial.getTime() + horasAdicionar * 3600000);
 
-      if (!relogiosPorTitulo[tituloPrincipal]) {
-        relogiosPorTitulo[tituloPrincipal] = [];
-      }
-
-      relogiosPorTitulo[tituloPrincipal].push({
-        id: tituloPrincipal + relogiosPorTitulo[tituloPrincipal].length,
+      const novoRelogio = {
+        titulo: tituloPrincipal,
         dataHora: novaData.getTime()
-      });
+      };
 
-      salvarRelogios();
-      exibirRelogios();
+      try {
+        await addDoc(collection(db, "relogiosCIP"), novoRelogio);
+        exibirRelogios();
+      } catch (e) {
+        console.error("Erro ao adicionar relógio: ", e);
+      }
     }
 
-    function exibirRelogios() {
+    // Função para exibir relógios
+    async function exibirRelogios() {
       const container = document.getElementById("containerRelogios");
       container.innerHTML = "";
 
-      Object.keys(relogiosPorTitulo).forEach(titulo => {
-        relogiosPorTitulo[titulo].forEach(relogio => {
-          const novoRelogio = document.createElement("div");
-          novoRelogio.classList.add("relogio");
-          novoRelogio.innerHTML = `<h2>${titulo}</h2>
-                                    <label for="nomeRelogio${relogio.id}">Nome do Relógio:</label>
-                                    <input type="text" id="nomeRelogio${relogio.id}">
-                                    <div>Próxima Data: ${new Date(relogio.dataHora).toLocaleDateString('pt-BR')} ${new Date(relogio.dataHora).toLocaleTimeString()}</div>
-                                    <div class="tempoRestante" id="tempoRestante${relogio.id}"></div>
-                                    <button onclick="apagarRelogio('${titulo}', '${relogio.id}')">Apagar Relógio</button>`;
-          container.appendChild(novoRelogio);
-          iniciarIntervalo(relogio.id, relogio.dataHora);
-        });
+      const querySnapshot = await getDocs(collection(db, "relogiosCIP"));
+      querySnapshot.forEach((doc) => {
+        const relogio = doc.data();
+        const novoRelogio = document.createElement("div");
+        novoRelogio.classList.add("relogio");
+        novoRelogio.innerHTML = `<h2>${relogio.titulo}</h2>
+                                  <div>Próxima Data: ${new Date(relogio.dataHora).toLocaleDateString('pt-BR')} ${new Date(relogio.dataHora).toLocaleTimeString()}</div>
+                                  <div class="tempoRestante" id="tempoRestante${doc.id}"></div>
+                                  <button onclick="apagarRelogio('${doc.id}')">Apagar Relógio</button>`;
+        container.appendChild(novoRelogio);
+        iniciarIntervalo(doc.id, relogio.dataHora);
       });
     }
 
+    // Função para iniciar o intervalo
     function iniciarIntervalo(id, dataHora) {
       setInterval(() => {
         const tempoRestante = Math.ceil((dataHora - Date.now()) / 1000);
@@ -104,23 +109,19 @@ input[type="text"], input[type="date"], input[type="time"], input[type="number"]
         tempoRestanteDiv.textContent = `Tempo Restante: ${horas} hora(s), ${minutos} minuto(s), ${segundos} segundo(s)`;
 
         if (tempoRestante <= 0) {
-          clearInterval(intervalos[id]);
           tempoRestanteDiv.textContent = "Tempo Restante: Tempo esgotado!";
         }
       }, 1000);
     }
 
-    function apagarRelogio(titulo, id) {
-      const index = relogiosPorTitulo[titulo].findIndex(relogio => relogio.id === id);
-      if (index !== -1) {
-        relogiosPorTitulo[titulo].splice(index, 1);
-        salvarRelogios();
+    // Função para apagar relógio
+    async function apagarRelogio(id) {
+      try {
+        await deleteDoc(doc(db, "relogiosCIP", id));
         exibirRelogios();
+      } catch (e) {
+        console.error("Erro ao apagar relógio: ", e);
       }
-    }
-
-    function salvarRelogios() {
-      localStorage.setItem('relogiosCIP', JSON.stringify(relogiosPorTitulo));
     }
 
     // Carregar os relógios ao carregar a página
@@ -128,5 +129,23 @@ input[type="text"], input[type="date"], input[type="time"], input[type="number"]
       exibirRelogios();
     };
   </script>
+</head>
+<body>
+  <h1>Tempo de CIP nas linhas de produção</h1>
+
+  <!-- Formulário para adicionar relógios -->
+  <label for="tituloPrincipal">Título Principal:</label>
+  <input type="text" id="tituloPrincipal">
+  <br>
+  <label for="dataInicial">Data Inicial:</label>
+  <input type="date" id="dataInicial">
+  <input type="time" id="horaInicial">
+  <br>
+  <label for="horasAdicionar">Adicionar Horas:</label>
+  <input type="number" id="horasAdicionar" min="1" step="1">
+  <button onclick="adicionarRelogio()">Adicionar Relógio</button>
+
+  <!-- Container para os relógios adicionados -->
+  <div id="containerRelogios"></div>
 </body>
 </html>
