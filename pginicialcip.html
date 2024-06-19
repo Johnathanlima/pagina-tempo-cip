@@ -61,6 +61,11 @@
       const horaInicialString = document.getElementById("horaInicial").value;
       const horasAdicionar = parseInt(document.getElementById("horasAdicionar").value);
 
+      if (!tituloPrincipal || !dataInicialString || !horaInicialString || isNaN(horasAdicionar)) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+
       const dataHoraInicialString = `${dataInicialString}T${horaInicialString}`;
       const dataHoraInicial = new Date(dataHoraInicialString);
 
