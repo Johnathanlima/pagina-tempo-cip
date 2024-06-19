@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login Britvic</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .form-group button {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 3px;
+      background-color: #1877f2;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #1464c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login Britvic</h2>
+    <div class="form-group">
+      <label for="username">Usuário:</label>
+      <input type="text" id="username">
+    </div>
+    <div class="form-group">
+      <label for="password">Senha:</label>
+      <input type="password" id="password">
+    </div>
+    <div class="form-group">
+      <button onclick="login()">Entrar</button>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username === "producao" && password === "1234") {
+        window.location.href = "pginicialcip.html"; // Substitua com o caminho correto
+      } else {
+        alert("Usuário ou senha incorretos. Tente novamente.");
+      }
+    }
+  </script>
+</body>
+</html>
