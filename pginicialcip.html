@@ -61,27 +61,17 @@
       const horaInicialString = document.getElementById("horaInicial").value;
       const horasAdicionar = parseInt(document.getElementById("horasAdicionar").value);
 
-      // Verificação dos campos
-      if (!tituloPrincipal || !dataInicialString || !horaInicialString || isNaN(horasAdicionar)) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-      }
-
-      // Criando a data e hora inicial
       const dataHoraInicialString = `${dataInicialString}T${horaInicialString}`;
       const dataHoraInicial = new Date(dataHoraInicialString);
 
-      // Calculando a nova data e hora
       const novaData = new Date(dataHoraInicial.getTime() + horasAdicionar * 3600000);
 
-      // Criando o novo relógio
       const novoRelogio = {
         titulo: tituloPrincipal,
         dataHora: novaData.getTime()
       };
 
       try {
-        // Adicionando o relógio no Firestore
         await addDoc(collection(db, "relogiosCIP"), novoRelogio);
         exibirRelogios();
       } catch (e) {
