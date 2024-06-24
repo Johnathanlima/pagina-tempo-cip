@@ -61,8 +61,18 @@
       const horaInicialString = document.getElementById("horaInicial").value;
       const horasAdicionar = parseInt(document.getElementById("horasAdicionar").value);
 
+      if (!tituloPrincipal || !dataInicialString || !horaInicialString || isNaN(horasAdicionar)) {
+        alert("Por favor, preencha todos os campos corretamente.");
+        return;
+      }
+
       const dataHoraInicialString = `${dataInicialString}T${horaInicialString}`;
       const dataHoraInicial = new Date(dataHoraInicialString);
+
+      if (isNaN(dataHoraInicial.getTime())) {
+        alert("Data e hora inicial inválidas.");
+        return;
+      }
 
       const novaData = new Date(dataHoraInicial.getTime() + horasAdicionar * 3600000);
 
@@ -90,7 +100,7 @@
         const novoRelogio = document.createElement("div");
         novoRelogio.classList.add("relogio");
         novoRelogio.innerHTML = `<h2>${relogio.titulo}</h2>
-                                  <div>Próxima Data: ${new Date(relogio.dataHora).toLocaleDateString('pt-BR')} ${new Date(relogio.dataHora).toLocaleTimeString()}</div>
+                                  <div>Próxima Data: ${new Date(relogio.dataHora).toLocaleDateString('pt-BR')} ${new Date(relogio.dataHora).toLocaleTimeString('pt-BR')}</div>
                                   <div class="tempoRestante" id="tempoRestante${doc.id}"></div>
                                   <button onclick="apagarRelogio('${doc.id}')">Apagar Relógio</button>`;
         container.appendChild(novoRelogio);
